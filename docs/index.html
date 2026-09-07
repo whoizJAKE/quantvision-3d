@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QuantVision 3D - Research Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  :root{--bg:#0d1117;--panel:#161b22;--border:#30363d;--text:#c9d1d9;--accent:#58a6ff;--green:#3fb950;--red:#f85149;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,sans-serif;}
+  header{padding:28px 32px 16px;border-bottom:1px solid var(--border);}
+  header h1{margin:0;font-size:26px;color:#fff;}
+  header p{margin:6px 0 0;color:#8b949e;font-size:14px;}
+  .badge{display:inline-block;background:#21262d;border:1px solid var(--border);color:#8b949e;font-size:12px;padding:3px 8px;border-radius:12px;margin-top:8px;}
+  main{max-width:1200px;margin:0 auto;padding:24px 32px 60px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-bottom:28px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+  .card h3{margin:0 0 6px;font-size:13px;color:#8b949e;text-transform:uppercase;letter-spacing:.04em;}
+  .card .value{font-size:26px;font-weight:600;color:#fff;}
+  .card .value.pos{color:var(--green);}
+  .card .value.neg{color:var(--red);}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:28px;}
+  .panel h2{margin:0 0 16px;font-size:16px;color:#fff;}
+  .chart-wrap{position:relative;height:320px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+  th{color:#8b949e;font-weight:500;}
+  footer{text-align:center;color:#6e7681;font-size:12px;padding:20px;border-top:1px solid var(--border);}
+  a{color:var(--accent);text-decoration:none;}
+  .note{background:#1c2333;border:1px solid #2d3a55;border-radius:8px;padding:12px 16px;font-size:13px;color:#8b949e;margin-bottom:24px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>QuantVision 3D</h1>
+  <p>Local quantitative-research dashboard — model comparison, calibration, and walk-forward backtest results.</p>
+  <span class="badge">Research &amp; paper trading only — not investment advice</span>
+</header>
+<main>
+  <div class="note">
+    This is a static showcase page reflecting the QuantVision research pipeline (Logistic Regression, Gradient Boosting, PyTorch Transformer ensemble). Replace the placeholder arrays in <code>data.js</code>-style variables below with exported results from your local <code>train.py</code> / backtest runs to populate real numbers.
+  </div>
+
+  <div class="grid" id="summaryCards"></div>
+
+  <div class="panel">
+    <h2>Equity Curve vs Benchmark (Out-of-Sample)</h2>
+    <div class="chart-wrap"><canvas id="equityChart"></canvas></div>
+  </div>
+
+  <div class="grid" style="grid-template-columns:1fr 1fr;">
+    <div class="panel">
+      <h2>Model Accuracy Comparison</h2>
+      <div class="chart-wrap"><canvas id="modelChart"></canvas></div>
+    </div>
+    <div class="panel">
+      <h2>Probability Calibration</h2>
+      <div class="chart-wrap"><canvas id="calibChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Recent Simulated Trades</h2>
+    <table id="tradesTable">
+      <thead><tr><th>Date</th><th>Asset</th><th>Signal</th><th>Prob.</th><th>Entry</th><th>Exit</th><th>P&amp;L</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</main>
+<footer>
+  QuantVision 3D · <a href="https://github.com/whoizJAKE/quantvision-3d">View source on GitHub</a> · Educational project, not financial advice.
+</footer>
+
+<script>
+// ---- Placeholder demo data: replace with real exported results ----
+const summary = [
+  {label:'Out-of-Sample CAGR', value:'8.4%', cls:'pos'},
+  {label:'Sharpe Ratio', value:'0.71', cls:'pos'},
+  {label:'Max Drawdown', value:'-13.6%', cls:'neg'},
+  {label:'Win Rate', value:'54.2%', cls:''},
+];
+const summaryEl = document.getElementById('summaryCards');
+summary.forEach(s=>{
+  const d=document.createElement('div');
+  d.className='card';
+  d.innerHTML=`<h3>${s.label}</h3><div class="value ${s.cls}">${s.value}</div>`;
+  summaryEl.appendChild(d);
+});
+
+const labels = Array.from({length:24},(_,i)=>`M${i+1}`);
+function randomWalk(start,drift,vol){
+  let v=start; return labels.map(()=>{v+=drift+(Math.random()-0.5)*vol; return v;});
+}
+new Chart(document.getElementById('equityChart'),{
+  type:'line',
+  data:{labels, datasets:[
+    {label:'QuantVision Ensemble', data:randomWalk(100,1.1,3), borderColor:'#58a6ff', backgroundColor:'transparent', tension:.3},
+    {label:'Benchmark (Buy & Hold)', data:randomWalk(100,0.6,2), borderColor:'#8b949e', backgroundColor:'transparent', tension:.3, borderDash:[4,4]},
+  ]},
+  options:{plugins:{legend:{labels:{color:'#c9d1d9'}}}, scales:{x:{ticks:{color:'#8b949e'}},y:{ticks:{color:'#8b949e'}}}}
+});
+
+new Chart(document.getElementById('modelChart'),{
+  type:'bar',
+  data:{labels:['Logistic Reg.','Gradient Boosting','Transformer','Ensemble'],
+    datasets:[{label:'Directional Accuracy', data:[52.8,55.1,54.3,56.4], backgroundColor:'#58a6ff'}]},
+  options:{plugins:{legend:{display:false}}, scales:{x:{ticks:{color:'#8b949e'}},y:{ticks:{color:'#8b949e'},beginAtZero:true,max:70}}}
+});
+
+new Chart(document.getElementById('calibChart'),{
+  type:'line',
+  data:{labels:['0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9'],
+    datasets:[
+      {label:'Perfect Calibration', data:[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9], borderColor:'#6e7681', borderDash:[4,4], pointRadius:0},
+      {label:'Ensemble (observed)', data:[0.12,0.19,0.34,0.38,0.47,0.63,0.66,0.74,0.81], borderColor:'#3fb950', pointRadius:3},
+    ]},
+  options:{plugins:{legend:{labels:{color:'#c9d1d9'}}}, scales:{x:{ticks:{color:'#8b949e'}},y:{ticks:{color:'#8b949e'}}}}
+});
+
+const trades = [
+  ['2026-08-28','SPY','LONG','0.63','512.10','516.40','+0.84%'],
+  ['2026-08-24','QQQ','LONG','0.59','478.20','475.90','-0.48%'],
+  ['2026-08-19','SPY','FLAT','0.51','-','-','0.00%'],
+  ['2026-08-12','XIU.TO','LONG','0.61','34.80','35.30','+1.44%'],
+];
+const tbody = document.querySelector('#tradesTable tbody');
+trades.forEach(r=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML = r.map(c=>`<td>${c}</td>`).join('');
+  tbody.appendChild(tr);
+});
+</script>
+</body>
+</html>
