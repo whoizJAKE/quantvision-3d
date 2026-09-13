@@ -6,3 +6,7 @@ plotly>=5.24
 scikit-learn>=1.5
 torch>=2.3
 joblib>=1.4
+fastapi>=0.115
+uvicorn>=0.30
+pyyaml>=6.0
+pytest>=8.0

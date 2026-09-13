@@ -2,5 +2,10 @@
 __pycache__/
 *.py[cod]
 artifacts/
+data/
 .streamlit/secrets.toml
 .DS_Store
+quantvisionUI/snapshot.json
+web/snapshot.json
+*.db
+.pytest_cache/

@@ -1,0 +1,46 @@
+etl:
+  db_path: data/quantvision.db
+  artifacts_dir: artifacts
+  snapshot_path: quantvisionUI/snapshot.json
+  poll_seconds: 20
+  request_timeout: 20
+  kalshi:
+    enabled: true
+    base_url: https://api.elections.kalshi.com/trade-api/v2
+    max_markets: 25
+    min_volume_24h: 50
+    exclude_mve: true
+  polymarket:
+    enabled: true
+    gamma_url: https://gamma-api.polymarket.com
+    clob_url: https://clob.polymarket.com
+    data_url: https://data-api.polymarket.com
+    max_markets: 25
+    min_volume_24h: 10000
+
+monitor:
+  default_threshold: 0.10
+  major_threshold: 0.05
+  major_min_volume: 100000
+  alert_log: data/alerts.log
+  webhook_url: null
+
+web:
+  host: 127.0.0.1
+  port: 8787
+  cors_origins:
+    - http://127.0.0.1:8787
+    - http://localhost:8787
+    - https://jacobhmaiddout.com
+    - https://www.jacobhmaiddout.com
+    - https://whoizjake.github.io
+
+mappings:
+  - ticker: BTC-USD
+    keywords: [bitcoin, btc]
+  - ticker: ETH-USD
+    keywords: [ethereum, ether, " eth "]
+  - ticker: SPY
+    keywords: [s&p, spx, spy, "s and p"]
+  - ticker: NVDA
+    keywords: [nvidia, nvda]
